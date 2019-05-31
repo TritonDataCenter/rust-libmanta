@@ -5,6 +5,7 @@
 extern crate serde_json;
 
 pub mod moray;
+mod util;
 
 #[cfg(test)]
 mod tests {
