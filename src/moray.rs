@@ -114,9 +114,8 @@ impl Arbitrary for MantaObject {
         let vnode: u64 = g.gen();
         let content_length: u64 = g.gen();
 
-        let md5_sum =
-            format!("{:x}", md5::compute(util::random_string(g, len)));
-        let content_md5: String = base64::encode(&md5_sum);
+        let md5_sum = md5::compute(util::random_string(g, len));
+        let content_md5: String = base64::encode(&*md5_sum);
 
         let etag: String = Uuid::new_v4().to_string();
         let content_type: String = util::random_string(g, len);
