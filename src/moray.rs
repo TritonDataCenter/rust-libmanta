@@ -1,6 +1,4 @@
-/*
- * Copyright 2019 Joyent, Inc.
- */
+// Copyright 2019 Joyent, Inc.
 
 use crate::util;
 use base64;
@@ -75,10 +73,16 @@ pub struct MantaDirectory {
 // Implement Arbitrary traits for testing
 impl Arbitrary for MantaObjectShark {
     fn arbitrary<G: Gen>(g: &mut G) -> MantaObjectShark {
-        let len = g.gen::<u8>() as usize;
+        let len = g.gen_range(1, 100) as usize;
+        let msid = format!(
+            "{}.{}.{}",
+            len,
+            util::random_string(g, len),
+            util::random_string(g, len)
+        );
         MantaObjectShark {
             datacenter: util::random_string(g, len),
-            manta_storage_id: util::random_string(g, len),
+            manta_storage_id: msid,
         }
     }
 }
@@ -143,4 +147,38 @@ impl Arbitrary for MantaObject {
             sharks,
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quickcheck::quickcheck;
+    use regex::Regex;
+    use std::str::FromStr;
+
+    quickcheck!(
+        fn create_manta_object(mobj: MantaObject) -> bool {
+            dbg!(&mobj);
+
+            let str_etag = Uuid::from_str(mobj.etag.as_str());
+            let str_owner = Uuid::from_str(mobj.owner.as_str());
+            let str_object_id = Uuid::from_str(mobj.object_id.as_str());
+            assert!(str_etag.is_ok());
+            assert!(str_owner.is_ok());
+            assert!(str_object_id.is_ok());
+
+            assert_eq!(str_etag.unwrap().to_string(), mobj.etag);
+            assert_eq!(str_owner.unwrap().to_string(), mobj.owner);
+            assert_eq!(str_object_id.unwrap().to_string(), mobj.object_id);
+
+            let re = Regex::new(r"(?i)\d+.[a-z0-9-]+.[a-z0-9-]+").unwrap();
+
+            for shark in mobj.sharks.iter() {
+                dbg!(&shark.manta_storage_id);
+                assert!(re.is_match(&shark.manta_storage_id));
+            }
+
+            true
+        }
+    );
 }
