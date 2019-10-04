@@ -2,11 +2,17 @@
 
 use crate::util;
 use base64;
+use diesel::backend;
+use diesel::deserialize::{self, FromSql};
+use diesel::serialize::{self, IsNull, Output, ToSql};
+use diesel::sql_types;
+use diesel::sqlite::Sqlite;
 use md5;
 use quickcheck::{Arbitrary, Gen};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
+use std::io::Write;
 use uuid::Uuid;
 
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
@@ -19,8 +25,18 @@ pub enum ObjectType {
     Directory(MantaDirectory),
 }
 
-#[derive(Deserialize, Serialize, Default, PartialEq, Debug, Clone)]
+#[derive(
+    Deserialize,
+    Serialize,
+    Default,
+    PartialEq,
+    Debug,
+    Clone,
+    FromSqlRow,
+    AsExpression,
+)]
 #[serde(rename_all = "camelCase")]
+#[sql_type = "sql_types::Text"]
 pub struct MantaObject {
     pub headers: Value,
     pub key: String,
@@ -49,6 +65,28 @@ pub struct MantaObject {
 
     #[serde(default)]
     pub sharks: Vec<MantaObjectShark>,
+}
+
+impl ToSql<sql_types::Text, Sqlite> for MantaObject {
+    fn to_sql<W: Write>(
+        &self,
+        out: &mut Output<W, Sqlite>,
+    ) -> serialize::Result {
+        let manta_str = serde_json::to_string(&self).unwrap();
+        out.write_all(manta_str.as_bytes())?;
+
+        Ok(IsNull::No)
+    }
+}
+
+impl FromSql<sql_types::Text, Sqlite> for MantaObject {
+    fn from_sql(
+        bytes: Option<backend::RawValue<Sqlite>>,
+    ) -> deserialize::Result<Self> {
+        let manta_obj: MantaObject =
+            serde_json::from_str(not_none!(bytes).read_text())?;
+        Ok(manta_obj)
+    }
 }
 
 #[derive(Deserialize, Serialize, Default, PartialEq, Debug, Clone)]
