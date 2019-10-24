@@ -66,7 +66,7 @@ pub struct MantaObject {
     #[serde(default)]
     pub sharks: Vec<MantaObjectShark>,
 
-    #[serde(alias = "type", default)]
+    #[serde(alias = "type", rename(serialize = "type"), default)]
     pub obj_type: String,
 }
 
@@ -108,7 +108,7 @@ pub struct MantaDirectory {
     pub name: String,
     pub owner: String,
     pub roles: Vec<String>, // TODO: double check this is a String
-    #[serde(alias = "type", default)]
+    #[serde(alias = "type", rename(serialize = "type"), default)]
     pub dir_type: String,
     pub vnode: u64,
 }
@@ -199,6 +199,7 @@ mod tests {
     use super::*;
     use quickcheck::quickcheck;
     use regex::Regex;
+    use serde_json;
     use std::str::FromStr;
 
     quickcheck!(
@@ -222,6 +223,16 @@ mod tests {
                 dbg!(&shark.manta_storage_id);
                 assert!(re.is_match(&shark.manta_storage_id));
             }
+
+            let to_value = serde_json::to_value(mobj.clone()).unwrap();
+
+            assert!(to_value.get("type").is_some());
+            dbg!(&to_value);
+
+            let from_value: MantaObject =
+                serde_json::from_value(to_value).unwrap();
+
+            assert_eq!(from_value, mobj);
 
             true
         }
