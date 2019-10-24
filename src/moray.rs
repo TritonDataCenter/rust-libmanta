@@ -108,6 +108,8 @@ pub struct MantaDirectory {
     pub name: String,
     pub owner: String,
     pub roles: Vec<String>, // TODO: double check this is a String
+    #[serde(alias = "type", default)]
+    pub dir_type: String,
     pub vnode: u64,
 }
 
