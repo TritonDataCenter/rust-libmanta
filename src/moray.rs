@@ -65,6 +65,9 @@ pub struct MantaObject {
 
     #[serde(default)]
     pub sharks: Vec<MantaObjectShark>,
+
+    #[serde(alias = "type", default)]
+    pub obj_type: String,
 }
 
 impl ToSql<sql_types::Text, Sqlite> for MantaObject {
@@ -105,6 +108,8 @@ pub struct MantaDirectory {
     pub name: String,
     pub owner: String,
     pub roles: Vec<String>, // TODO: double check this is a String
+    #[serde(alias = "type", default)]
+    pub dir_type: String,
     pub vnode: u64,
 }
 
@@ -166,6 +171,7 @@ impl Arbitrary for MantaObject {
             MantaObjectShark::arbitrary(g),
             MantaObjectShark::arbitrary(g),
         ];
+        let obj_type = String::from("object");
 
         MantaObject {
             headers,
@@ -183,6 +189,7 @@ impl Arbitrary for MantaObject {
             object_id,
             etag,
             sharks,
+            obj_type,
         }
     }
 }
