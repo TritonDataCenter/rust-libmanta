@@ -4,12 +4,10 @@ use crate::util;
 use base64;
 use diesel::backend;
 use diesel::deserialize::{self, FromSql};
-use diesel::pg::{Pg, PgValue};
 use diesel::serialize::{self, IsNull, Output, ToSql};
 use diesel::sql_types;
 use diesel::sqlite::Sqlite;
-use md5;
-use quickcheck::{Arbitrary, Gen};
+use md5; use quickcheck::{Arbitrary, Gen};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -90,25 +88,6 @@ impl FromSql<sql_types::Text, Sqlite> for MantaObject {
     ) -> deserialize::Result<Self> {
         let manta_obj: MantaObject =
             serde_json::from_str(not_none!(bytes).read_text())?;
-        Ok(manta_obj)
-    }
-}
-
-// Postgres
-impl ToSql<sql_types::Text, Pg> for MantaObject {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
-        let manta_str = serde_json::to_string(&self).unwrap();
-        out.write_all(manta_str.as_bytes())?;
-
-        Ok(IsNull::No)
-    }
-}
-
-impl FromSql<sql_types::Text, Pg> for MantaObject {
-    fn from_sql(bytes: Option<PgValue<'_>>) -> deserialize::Result<Self> {
-        let t: PgValue = not_none!(bytes);
-        let t_str = String::from_utf8_lossy(t.as_bytes());
-        let manta_obj: MantaObject = serde_json::from_str(&t_str)?;
         Ok(manta_obj)
     }
 }
@@ -258,4 +237,27 @@ mod tests {
             true
         }
     );
+}
+
+#[cfg(feature = "postgres")]
+use diesel::pg::{Pg, PgValue};
+
+#[cfg(feature = "postgres")]
+impl ToSql<sql_types::Text, Pg> for MantaObject {
+    fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
+        let manta_str = serde_json::to_string(&self).unwrap();
+        out.write_all(manta_str.as_bytes())?;
+
+        Ok(IsNull::No)
+    }
+}
+
+#[cfg(feature = "postgres")]
+impl FromSql<sql_types::Text, Pg> for MantaObject {
+    fn from_sql(bytes: Option<PgValue<'_>>) -> deserialize::Result<Self> {
+        let t: PgValue = not_none!(bytes);
+        let t_str = String::from_utf8_lossy(t.as_bytes());
+        let manta_obj: MantaObject = serde_json::from_str(&t_str)?;
+        Ok(manta_obj)
+    }
 }
