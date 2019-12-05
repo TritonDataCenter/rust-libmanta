@@ -4,7 +4,6 @@ use crate::util;
 use base64;
 use diesel::backend;
 use diesel::deserialize::{self, FromSql};
-use diesel::pg::{Pg, PgValue};
 use diesel::serialize::{self, IsNull, Output, ToSql};
 use diesel::sql_types;
 use diesel::sqlite::Sqlite;
@@ -94,7 +93,10 @@ impl FromSql<sql_types::Text, Sqlite> for MantaObject {
     }
 }
 
-// Postgres
+#[cfg(feature = "postgres")]
+use diesel::pg::{Pg, PgValue};
+
+#[cfg(feature = "postgres")]
 impl ToSql<sql_types::Text, Pg> for MantaObject {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         let manta_str = serde_json::to_string(&self).unwrap();
@@ -104,6 +106,7 @@ impl ToSql<sql_types::Text, Pg> for MantaObject {
     }
 }
 
+#[cfg(feature = "postgres")]
 impl FromSql<sql_types::Text, Pg> for MantaObject {
     fn from_sql(bytes: Option<PgValue<'_>>) -> deserialize::Result<Self> {
         let t: PgValue = not_none!(bytes);

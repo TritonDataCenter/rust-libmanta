@@ -1,6 +1,6 @@
 [package]
 name = "libmanta"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Rui Loura <rui@joyent.com>"]
 edition = "2018"
 
@@ -13,8 +13,12 @@ md5 = "0.6.1"
 base64 = "0.10.1"
 rand = "0.6.5"
 regex = "1.1.9"
-diesel = {version = "1.4.2", features = ["sqlite", "postgres"]}
+diesel = {version = "1.4.2", features = ["sqlite"]}
 
 [patch.crates-io]
 diesel = { git = 'https://github.com/diesel-rs/diesel' }
 diesel_derives = { git = "https://github.com/diesel-rs/diesel" }
+
+
+[features]
+postgres = ["diesel/postgres"]
