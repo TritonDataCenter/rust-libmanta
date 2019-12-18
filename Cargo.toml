@@ -1,6 +1,6 @@
 [package]
 name = "libmanta"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Rui Loura <rui@joyent.com>"]
 edition = "2018"
 
