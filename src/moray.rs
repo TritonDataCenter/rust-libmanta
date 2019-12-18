@@ -10,22 +10,16 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use uuid::Uuid;
 
+#[cfg(feature = "sqlite")]
 #[cfg(feature = "postgres")]
-use diesel::{
-    deserialize::{self, FromSql},
-    serialize::{self, IsNull, Output, ToSql}
-};
+use std::io::Write;
 
+#[cfg(feature = "postgres")]
 #[cfg(feature = "sqlite")]
 use diesel::{
     deserialize::{self, FromSql},
     serialize::{self, IsNull, Output, ToSql}
 };
-
-#[cfg(feature = "sqlite")]
-use std::io::Write;
-#[cfg(feature = "postgres")]
-use std::io::Write;
 
 #[cfg(feature = "sqlite")]
 use diesel::sqlite::Sqlite;
@@ -88,7 +82,6 @@ pub struct MantaObject {
     pub obj_type: String,
 }
 
-// Sqlite
 #[cfg(feature = "sqlite")]
 impl ToSql<sql_types::Text, Sqlite> for MantaObject {
     fn to_sql<W: Write>(
