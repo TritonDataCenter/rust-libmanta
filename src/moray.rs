@@ -10,15 +10,13 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use uuid::Uuid;
 
-#[cfg(feature = "sqlite")]
-#[cfg(feature = "postgres")]
+#[cfg(any(feature = "sqlite", feature = "postgres"))]
 use std::io::Write;
 
-#[cfg(feature = "postgres")]
-#[cfg(feature = "sqlite")]
+#[cfg(any(feature = "sqlite", feature = "postgres"))]
 use diesel::{
     deserialize::{self, FromSql},
-    serialize::{self, IsNull, Output, ToSql}
+    serialize::{self, IsNull, Output, ToSql},
 };
 
 #[cfg(feature = "sqlite")]
