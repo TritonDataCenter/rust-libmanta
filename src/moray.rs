@@ -2,18 +2,28 @@
 
 use crate::util;
 use base64;
-use diesel::backend;
-use diesel::deserialize::{self, FromSql};
-use diesel::serialize::{self, IsNull, Output, ToSql};
 use diesel::sql_types;
-use diesel::sqlite::Sqlite;
 use md5;
 use quickcheck::{Arbitrary, Gen};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use std::io::Write;
 use uuid::Uuid;
+
+#[cfg(any(feature = "sqlite", feature = "postgres"))]
+use std::io::Write;
+
+#[cfg(any(feature = "sqlite", feature = "postgres"))]
+use diesel::{
+    deserialize::{self, FromSql},
+    serialize::{self, IsNull, Output, ToSql},
+};
+
+#[cfg(feature = "sqlite")]
+use diesel::sqlite::Sqlite;
+
+#[cfg(feature = "sqlite")]
+use diesel::backend;
 
 #[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 #[serde(tag = "type")]
@@ -70,7 +80,7 @@ pub struct MantaObject {
     pub obj_type: String,
 }
 
-// Sqlite
+#[cfg(feature = "sqlite")]
 impl ToSql<sql_types::Text, Sqlite> for MantaObject {
     fn to_sql<W: Write>(
         &self,
@@ -83,6 +93,7 @@ impl ToSql<sql_types::Text, Sqlite> for MantaObject {
     }
 }
 
+#[cfg(feature = "sqlite")]
 impl FromSql<sql_types::Text, Sqlite> for MantaObject {
     fn from_sql(
         bytes: Option<backend::RawValue<Sqlite>>,
