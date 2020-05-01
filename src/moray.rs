@@ -185,16 +185,19 @@ impl Arbitrary for MantaObject {
             Value::String(util::random_string(g, len)),
         );
 
+        // We don't want negative numbers here, but postgres bigint max is
+        // i64::MAX.
+        let mtime: u64 = g.gen_range(0, std::i64::MAX) as u64;
+        let vnode: u64 = g.gen_range(0, std::i64::MAX) as u64;
+        let content_length: u64 = g.gen_range(0, std::i64::MAX) as u64;
+
         let headers = Value::Object(headers_map);
         let key = util::random_string(g, len);
-        let mtime: u64 = g.gen();
         let creator = util::random_string(g, len);
         let dirname = util::random_string(g, len);
         let name = util::random_string(g, len);
         let owner = Uuid::new_v4().to_string();
         let roles: Vec<String> = vec![util::random_string(g, len)];
-        let vnode: u64 = g.gen();
-        let content_length: u64 = g.gen();
 
         let md5_sum = md5::compute(util::random_string(g, len));
         let content_md5: String = base64::encode(&*md5_sum);
