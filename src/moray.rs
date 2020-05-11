@@ -50,13 +50,13 @@ pub enum ObjectType {
 pub struct MantaObject {
     pub headers: Value,
     pub key: String,
-    pub mtime: u64,
+    pub mtime: i64,
     pub name: String,
     pub creator: String,
     pub dirname: String,
     pub owner: String,
     pub roles: Vec<String>, // TODO: double check this is a String
-    pub vnode: u64,
+    pub vnode: i64,
 
     #[serde(alias = "contentLength", default)]
     pub content_length: u64,
@@ -139,13 +139,13 @@ pub struct MantaDirectory {
     pub dirname: String,
     pub headers: Value,
     pub key: String,
-    pub mtime: u64,
+    pub mtime: i64,
     pub name: String,
     pub owner: String,
     pub roles: Vec<String>, // TODO: double check this is a String
     #[serde(alias = "type", rename(serialize = "type"), default)]
     pub dir_type: String,
-    pub vnode: u64,
+    pub vnode: i64,
 }
 
 // Implement Arbitrary traits for testing
@@ -185,16 +185,19 @@ impl Arbitrary for MantaObject {
             Value::String(util::random_string(g, len)),
         );
 
+        // We don't want negative numbers here, but these fields are
+        // indexes and postgres bigint's the max of which is i64::MAX.
+        let mtime: i64 = g.gen_range(0, std::i64::MAX);
+        let vnode: i64 = g.gen_range(0, std::i64::MAX);
+
+        let content_length: u64 = g.gen();
         let headers = Value::Object(headers_map);
         let key = util::random_string(g, len);
-        let mtime: u64 = g.gen();
         let creator = util::random_string(g, len);
         let dirname = util::random_string(g, len);
         let name = util::random_string(g, len);
         let owner = Uuid::new_v4().to_string();
         let roles: Vec<String> = vec![util::random_string(g, len)];
-        let vnode: u64 = g.gen();
-        let content_length: u64 = g.gen();
 
         let md5_sum = md5::compute(util::random_string(g, len));
         let content_md5: String = base64::encode(&*md5_sum);
