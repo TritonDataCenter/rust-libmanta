@@ -123,7 +123,7 @@ impl<T> FromSql<sql_types::Text, Pg> for T where T: Deserialize {
         let t: PgValue = not_none!(bytes);
         let t_str = String::from_utf8_lossy(t.as_bytes());
         let manta_obj: MantaObject = serde_json::from_str(&t_str)?;
-        Ok(mantA_OBJ)
+        Ok(manta_obj)
     }
 }
 
