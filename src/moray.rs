@@ -1,4 +1,4 @@
-// Copyright 2019 Joyent, Inc.
+// Copyright 2020 Joyent, Inc.
 
 use crate::util;
 use base64;
@@ -118,7 +118,7 @@ impl<T> ToSql<sql_types::Text, Pg> for T where T: Serialize {
 }
 
 #[cfg(feature = "postgres")]
-impl<T> FromSql<sql_types::Text, Pg> for T where T: Deserialize {
+impl<T> FromSql<sql_types::Text, Pg> for T where T: Deserialize<'_> {
     fn from_sql(bytes: Option<PgValue<'_>>) -> deserialize::Result<Self> {
         let t: PgValue = not_none!(bytes);
         let t_str = String::from_utf8_lossy(t.as_bytes());
