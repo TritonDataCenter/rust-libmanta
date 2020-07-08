@@ -81,7 +81,7 @@ pub struct MantaObject {
 }
 
 #[cfg(feature = "sqlite")]
-impl ToSql<sql_types::Text, Sqlite> for T where T: Serialize {
+impl<T> ToSql<sql_types::Text, Sqlite> for T where T: Serialize {
     fn to_sql<W: Write>(
         &self,
         out: &mut Output<W, Sqlite>,
@@ -94,7 +94,7 @@ impl ToSql<sql_types::Text, Sqlite> for T where T: Serialize {
 }
 
 #[cfg(feature = "sqlite")]
-impl FromSql<sql_types::Text, Sqlite> for T where T: Deserialize {
+impl<T> FromSql<sql_types::Text, Sqlite> for T where T: Deserialize {
     fn from_sql(
         bytes: Option<backend::RawValue<Sqlite>>,
     ) -> deserialize::Result<Self> {
@@ -108,7 +108,7 @@ impl FromSql<sql_types::Text, Sqlite> for T where T: Deserialize {
 use diesel::pg::{Pg, PgValue};
 
 #[cfg(feature = "postgres")]
-impl ToSql<sql_types::Text, Pg> for T where T: Serialize {
+impl<T> ToSql<sql_types::Text, Pg> for T where T: Serialize {
     fn to_sql<W: Write>(&self, out: &mut Output<W, Pg>) -> serialize::Result {
         let manta_str = serde_json::to_string(&self).unwrap();
         out.write_all(manta_str.as_bytes())?;
@@ -118,7 +118,7 @@ impl ToSql<sql_types::Text, Pg> for T where T: Serialize {
 }
 
 #[cfg(feature = "postgres")]
-impl FromSql<sql_types::Text, Pg> for T where T: Deserialize {
+impl<T> FromSql<sql_types::Text, Pg> for T where T: Deserialize {
     fn from_sql(bytes: Option<PgValue<'_>>) -> deserialize::Result<Self> {
         let t: PgValue = not_none!(bytes);
         let t_str = String::from_utf8_lossy(t.as_bytes());
