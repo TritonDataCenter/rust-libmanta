@@ -13,11 +13,11 @@ md5 = "0.6.1"
 base64 = "0.10.1"
 rand = "0.6.5"
 regex = "1.1.9"
-diesel = "1.4.2"
+diesel = "1.4.5"
 
-[patch.crates-io]
-diesel = { git = 'https://github.com/diesel-rs/diesel' }
-diesel_derives = { git = "https://github.com/diesel-rs/diesel" }
+#[patch.crates-io]
+#diesel = { git = 'https://github.com/diesel-rs/diesel' }
+#diesel_derives = { git = "https://github.com/diesel-rs/diesel" }
 
 
 [features]
